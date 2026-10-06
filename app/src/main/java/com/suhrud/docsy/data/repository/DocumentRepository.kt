@@ -138,9 +138,7 @@ class DocumentRepository(
                 val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
                 val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED)
 
-                var count = 0
-                val maxFilesToScan = 80
-                while (cursor.moveToNext() && count < maxFilesToScan) {
+                while (cursor.moveToNext()) {
                     val id = cursor.getLong(idCol)
                     val name = cursor.getString(nameCol) ?: "file_$id"
                     val mime = cursor.getString(mimeCol) ?: "application/octet-stream"
@@ -149,7 +147,6 @@ class DocumentRepository(
 
                     val contentUri = ContentUris.withAppendedId(collection, id)
                     processAndStoreFile(context, contentUri, name, mime, size, dateModified)
-                    count++
                 }
             }
         } catch (e: Exception) {
@@ -186,9 +183,7 @@ class DocumentRepository(
                 val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
                 val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_MODIFIED)
 
-                var count = 0
-                val maxImagesToScan = 60
-                while (cursor.moveToNext() && count < maxImagesToScan) {
+                while (cursor.moveToNext()) {
                     val id = cursor.getLong(idCol)
                     val name = cursor.getString(nameCol) ?: "image_$id"
                     val mime = cursor.getString(mimeCol) ?: "image/jpeg"
@@ -197,7 +192,6 @@ class DocumentRepository(
 
                     val contentUri = ContentUris.withAppendedId(collection, id)
                     processAndStoreFile(context, contentUri, name, mime, size, dateModified)
-                    count++
                 }
             }
         } catch (e: Exception) {
@@ -234,9 +228,7 @@ class DocumentRepository(
                 val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
                 val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
 
-                var count = 0
-                val maxAudioToScan = 80
-                while (cursor.moveToNext() && count < maxAudioToScan) {
+                while (cursor.moveToNext()) {
                     val id = cursor.getLong(idCol)
                     val name = cursor.getString(nameCol) ?: "audio_$id"
                     val mime = cursor.getString(mimeCol) ?: "audio/mpeg"
@@ -245,7 +237,6 @@ class DocumentRepository(
 
                     val contentUri = ContentUris.withAppendedId(collection, id)
                     processAndStoreFile(context, contentUri, name, mime, size, dateModified)
-                    count++
                 }
             }
         } catch (e: Exception) {
@@ -282,9 +273,7 @@ class DocumentRepository(
                 val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
                 val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED)
 
-                var count = 0
-                val maxVideoToScan = 80
-                while (cursor.moveToNext() && count < maxVideoToScan) {
+                while (cursor.moveToNext()) {
                     val id = cursor.getLong(idCol)
                     val name = cursor.getString(nameCol) ?: "video_$id"
                     val mime = cursor.getString(mimeCol) ?: "video/mp4"
@@ -293,7 +282,6 @@ class DocumentRepository(
 
                     val contentUri = ContentUris.withAppendedId(collection, id)
                     processAndStoreFile(context, contentUri, name, mime, size, dateModified)
-                    count++
                 }
             }
         } catch (e: Exception) {
@@ -303,60 +291,37 @@ class DocumentRepository(
 
     private suspend fun scanDirectDirectories(context: Context) = withContext(Dispatchers.IO) {
         val root = Environment.getExternalStorageDirectory()
-        val targetDirs = listOf(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
-            File(root, "Telegram"),
-            File(root, "WhatsApp"),
-            File(root, "Android/media")
-        )
-
-        for (dir in targetDirs) {
-            if (dir != null && dir.exists() && dir.isDirectory) {
-                documentDao.insertDocument(
-                    DocumentEntity(
-                        id = UUID.nameUUIDFromBytes(dir.absolutePath.toByteArray()).toString(),
-                        pathUri = dir.absolutePath,
-                        fileName = dir.name,
-                        isDirectory = true,
-                        parentFolder = dir.parent ?: "",
-                        indexStatus = "INDEXED"
-                    )
-                )
-
-                dir.walkTopDown().maxDepth(3).forEach { file ->
-                    if (file.isDirectory) {
-                        documentDao.insertDocument(
-                            DocumentEntity(
-                                id = UUID.nameUUIDFromBytes(file.absolutePath.toByteArray()).toString(),
-                                pathUri = file.absolutePath,
-                                fileName = file.name,
-                                isDirectory = true,
-                                parentFolder = file.parent ?: "",
-                                indexStatus = "INDEXED"
-                            )
+        if (root != null && root.exists() && root.isDirectory) {
+            root.walkTopDown().maxDepth(6).filter { !it.name.startsWith(".") }.forEach { file ->
+                if (file.isDirectory) {
+                    documentDao.insertDocument(
+                        DocumentEntity(
+                            id = UUID.nameUUIDFromBytes(file.absolutePath.toByteArray()).toString(),
+                            pathUri = file.absolutePath,
+                            fileName = file.name,
+                            isDirectory = true,
+                            parentFolder = file.parent ?: "",
+                            indexStatus = "INDEXED"
                         )
-                    } else if (file.isFile && file.length() > 0 && file.length() < 100 * 1024 * 1024) {
-                        val ext = file.extension.lowercase(Locale.ROOT)
-                        val mime = when (ext) {
-                            "pdf" -> "application/pdf"
-                            "txt" -> "text/plain"
-                            "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                            "jpg", "jpeg" -> "image/jpeg"
-                            "png" -> "image/png"
-                            "mp3", "m4a", "wav", "flac", "aac", "ogg", "opus" -> "audio/$ext"
-                            "mp4", "mkv", "mov", "avi", "3gp", "webm" -> "video/$ext"
-                            else -> null
-                        }
-                        if (mime != null) {
-                            val uri = Uri.fromFile(file)
-                            processAndStoreFile(context, uri, file.name, mime, file.length(), file.lastModified())
-                        }
+                    )
+                } else if (file.isFile && file.length() > 0 && file.length() < 150 * 1024 * 1024) {
+                    val ext = file.extension.lowercase(Locale.ROOT)
+                    val mime = when (ext) {
+                        "pdf" -> "application/pdf"
+                        "txt", "csv", "json", "xml", "log", "md" -> "text/plain"
+                        "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                        "jpg", "jpeg" -> "image/jpeg"
+                        "png" -> "image/png"
+                        "webp" -> "image/webp"
+                        "mp3", "m4a", "wav", "flac", "aac", "ogg", "opus" -> "audio/$ext"
+                        "mp4", "mkv", "mov", "avi", "3gp", "webm" -> "video/$ext"
+                        else -> null
+                    }
+                    if (mime != null) {
+                        val uri = Uri.fromFile(file)
+                        processAndStoreFile(context, uri, file.name, mime, file.length(), file.lastModified())
                     }
                 }
             }

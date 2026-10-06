@@ -3,10 +3,11 @@ package com.suhrud.docsy.ui.screens
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,7 +34,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,16 +41,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -59,14 +62,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.suhrud.docsy.data.model.ChatMessage
 import com.suhrud.docsy.ui.DocsyViewModel
-import com.suhrud.docsy.ui.components.AvatarView
 import com.suhrud.docsy.ui.components.DocsyArrowRightIcon
-import com.suhrud.docsy.ui.components.ProfileAvatar
 import com.suhrud.docsy.ui.components.DocsyLockIcon
 import com.suhrud.docsy.ui.components.DocsyLockOpenIcon
 import com.suhrud.docsy.ui.components.DocsyOpenIcon
 import com.suhrud.docsy.ui.components.DocsySearchIcon
+import com.suhrud.docsy.ui.components.ProfileAvatar
 import com.suhrud.docsy.ui.components.ScheduleTable
+import com.suhrud.docsy.ui.components.shimmerPulse
+import com.suhrud.docsy.ui.components.springClickable
 import com.suhrud.docsy.ui.theme.BorderLight
 import com.suhrud.docsy.ui.theme.LightSurface
 import com.suhrud.docsy.ui.theme.OffWhite
@@ -133,7 +137,7 @@ fun SimpleHomeScreen(
                             .clip(RoundedCornerShape(18.dp))
                             .border(1.dp, BorderLight, RoundedCornerShape(18.dp))
                             .background(PureWhite)
-                            .clickable { viewModel.startNewChat() }
+                            .springClickable { viewModel.startNewChat() }
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                             .testTag("btn_new_chat"),
                         contentAlignment = Alignment.Center
@@ -154,7 +158,7 @@ fun SimpleHomeScreen(
                         .clip(CircleShape)
                         .border(1.dp, BorderLight, CircleShape)
                         .background(PureWhite)
-                        .clickable { viewModel.openSettings() }
+                        .springClickable { viewModel.openSettings() }
                         .testTag("top_profile_icon_button"),
                     contentAlignment = Alignment.Center
                 ) {
@@ -206,11 +210,18 @@ fun SimpleHomeScreen(
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         items(chatHistory, key = { it.id }) { msg ->
-                            ChatMessageBubble(
-                                message = msg,
-                                viewModel = viewModel,
-                                context = context
-                            )
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = true,
+                                enter = slideInHorizontally(
+                                    initialOffsetX = { if (msg.isUser) it / 2 else -it / 2 }
+                                ) + fadeIn()
+                            ) {
+                                ChatMessageBubble(
+                                    message = msg,
+                                    viewModel = viewModel,
+                                    context = context
+                                )
+                            }
                         }
 
                         if (isSearching) {
@@ -276,7 +287,7 @@ fun SimpleHomeScreen(
                                     .size(32.dp)
                                     .clip(CircleShape)
                                     .background(LightSurface)
-                                    .clickable { onPerformSubmit() }
+                                    .springClickable { onPerformSubmit() }
                                     .testTag("simple_search_arrow"),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -299,6 +310,34 @@ fun SimpleHomeScreen(
             }
         }
     }
+}
+
+@Composable
+fun TypewriterText(
+    fullText: String,
+    style: TextStyle,
+    color: Color,
+    modifier: Modifier = Modifier,
+    delayMillis: Long = 16L
+) {
+    var displayedText by remember(fullText) { mutableStateOf("") }
+
+    LaunchedEffect(fullText) {
+        val words = fullText.split(" ")
+        val sb = StringBuilder()
+        for (i in words.indices) {
+            sb.append(words[i]).append(if (i < words.size - 1) " " else "")
+            displayedText = sb.toString()
+            delay(delayMillis)
+        }
+    }
+
+    Text(
+        text = displayedText,
+        style = style,
+        color = color,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -342,10 +381,11 @@ fun ChatMessageBubble(
                     .padding(horizontal = 18.dp, vertical = 14.dp)
             ) {
                 Column {
-                    // Docsy natural message text
-                    Text(
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary)
+                    // Docsy natural message text with smooth typewriter reveal
+                    TypewriterText(
+                        fullText = message.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = TextPrimary
                     )
 
                     // Hero Answer Highlight Card if present
@@ -394,7 +434,7 @@ fun ChatMessageBubble(
                                 .clip(RoundedCornerShape(16.dp))
                                 .border(1.dp, TextPrimary, RoundedCornerShape(16.dp))
                                 .background(PureWhite)
-                                .clickable { viewModel.toggleRevealSensitive() }
+                                .springClickable { viewModel.toggleRevealSensitive() }
                                 .padding(horizontal = 14.dp, vertical = 6.dp)
                                 .testTag("btn_tap_to_reveal")
                         ) {
@@ -430,7 +470,7 @@ fun ChatMessageBubble(
                                 .clip(RoundedCornerShape(14.dp))
                                 .border(1.dp, BorderLight, RoundedCornerShape(14.dp))
                                 .background(PureWhite)
-                                .clickable {
+                                .springClickable {
                                     val uri = message.sourceDocument.pathUri
                                     if (uri.isNotBlank()) {
                                         try {
@@ -493,7 +533,8 @@ fun MinimalFindingIndicator() {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.shimmerPulse()
     ) {
         Text(
             text = "Thinking$dots",

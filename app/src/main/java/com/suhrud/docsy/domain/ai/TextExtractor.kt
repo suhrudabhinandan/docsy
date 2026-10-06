@@ -23,8 +23,7 @@ import kotlin.coroutines.resume
 object TextExtractor {
 
     private const val TAG = "DocsyTextExtractor"
-    private const val MAX_IMAGE_DIMENSION = 1280
-    private const val MAX_PDF_PAGES_TO_SCAN = 3
+    private const val MAX_PDF_PAGES_TO_SCAN = 20
 
     private val textRecognizer by lazy {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -64,12 +63,12 @@ object TextExtractor {
                 }
 
                 ext == "pdf" || mimeType == "application/pdf" -> {
-                    methodUsed = "PdfRenderer + ML Kit OCR"
+                    methodUsed = "PdfRenderer + Full Native Resolution ML Kit OCR"
                     extracted = extractPdf(context, uri)
                 }
 
                 mimeType.startsWith("image/") || ext in listOf("jpg", "jpeg", "png", "webp", "bmp") -> {
-                    methodUsed = "Image ML Kit OCR"
+                    methodUsed = "Full Native Resolution ML Kit OCR"
                     extracted = extractImageOcr(context, uri)
                 }
 
@@ -105,7 +104,7 @@ object TextExtractor {
                 val sb = java.lang.StringBuilder()
                 var line = reader.readLine()
                 var linesCount = 0
-                while (line != null && linesCount < 2000) {
+                while (line != null && linesCount < 5000) {
                     sb.append(line).append("\n")
                     line = reader.readLine()
                     linesCount++
@@ -277,8 +276,9 @@ object TextExtractor {
 
                 for (pageIndex in 0 until pageCount) {
                     val page = renderer.openPage(pageIndex)
-                    val width = (page.width * 1.5).toInt().coerceAtMost(MAX_IMAGE_DIMENSION)
-                    val height = (page.height * 1.5).toInt().coerceAtMost(MAX_IMAGE_DIMENSION)
+                    // High-density 3.0x scale rendering without artificial dimension capping
+                    val width = (page.width * 3.0).toInt().coerceAtMost(4096)
+                    val height = (page.height * 3.0).toInt().coerceAtMost(4096)
                     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                     page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
                     page.close()
@@ -299,8 +299,7 @@ object TextExtractor {
     }
 
     private suspend fun extractImageOcr(context: Context, uri: Uri): String = withContext(Dispatchers.IO) {
-        val bitmap = decodeSampledBitmapFromUri(context, uri, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION)
-            ?: return@withContext ""
+        val bitmap = decodeFullNativeBitmapFromUri(context, uri) ?: return@withContext ""
         val text = runMlKitOcr(bitmap)
         bitmap.recycle()
         text
@@ -318,12 +317,7 @@ object TextExtractor {
             }
     }
 
-    private fun decodeSampledBitmapFromUri(
-        context: Context,
-        uri: Uri,
-        reqWidth: Int,
-        reqHeight: Int
-    ): Bitmap? {
+    private fun decodeFullNativeBitmapFromUri(context: Context, uri: Uri): Bitmap? {
         return try {
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             context.contentResolver.openInputStream(uri)?.use {
@@ -331,23 +325,20 @@ object TextExtractor {
             }
 
             var inSampleSize = 1
-            if (options.outHeight > reqHeight || options.outWidth > reqWidth) {
-                val halfHeight = options.outHeight / 2
-                val halfWidth = options.outWidth / 2
-                while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                    inSampleSize *= 2
-                }
+            val maxDim = maxOf(options.outWidth, options.outHeight)
+            if (maxDim > 4096) {
+                inSampleSize = 2
             }
 
             val decodeOptions = BitmapFactory.Options().apply {
                 this.inSampleSize = inSampleSize
-                inPreferredConfig = Bitmap.Config.RGB_565
+                inPreferredConfig = Bitmap.Config.ARGB_8888
             }
             context.contentResolver.openInputStream(uri)?.use {
                 BitmapFactory.decodeStream(it, null, decodeOptions)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to decode bitmap: ${e.message}")
+            Log.e(TAG, "Failed to decode native bitmap: ${e.message}")
             null
         }
     }
@@ -355,7 +346,7 @@ object TextExtractor {
     private fun readLegacyOfficeBestEffort(context: Context, uri: Uri): String {
         return try {
             context.contentResolver.openInputStream(uri)?.use { stream ->
-                val bytes = ByteArray(64 * 1024)
+                val bytes = ByteArray(256 * 1024)
                 val read = stream.read(bytes)
                 if (read <= 0) return ""
                 val sb = java.lang.StringBuilder()

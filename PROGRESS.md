@@ -2,42 +2,31 @@
 
 Last Build Result: assembleDebug PASSED | testFullDebugUnitTest PASSED (46/46) | assembleRelease PASSED | Version 1.0.5 (versionCode 6)
 
-## Recent Parts Summary
+## Recent Actions Summary
 
-### Part 0: Audit & Extraction Inspector (COMPLETED)
-- Updated `AUDIT.md` verifying proof for all 11 core requirements.
-- Built debug-only `ExtractionInspectorScreen.kt` for content and metadata inspection.
-- Fixed retrieval and parsing logic for failing queries (`"12th roll number"`, `"my 12th"`, `"cat exam"`).
+### 1. Boosted OCR Extraction (Full Native Resolution)
+- Removed `MAX_IMAGE_DIMENSION` caps in [`TextExtractor.kt`](file:///C:/Users/abhin/Downloads/docsy%20(3)/app/src/main/java/com/suhrud/docsy/domain/ai/TextExtractor.kt).
+- Configured PDF page rendering at high-density 3.0x scale and image decoding at full native resolution (up to 4096px bitmap bounds with OOM safeguards).
+- Raised max PDF pages per document scan from 10 to 20 pages.
 
-### Part 1: Quick, Certain Bug Fixes (COMPLETED)
-- **1a. Sequential Message Queue**: Added `Mutex` in `DocsyViewModel.kt` to process rapid user messages in strict sequential order without dropping or cancelling queries.
-- **1b. Live Data**: Ensured live readings at answer time for battery, RAM, storage, and network with `"as of HH:mm"` timestamps.
-- **1c. Routing Collisions & Word Boundaries**: Fixed word boundary parsing in `QueryParser.kt` so media counts (`"number of videos"`, `"musics on my device"`, `"photos count"`) route to `DEVICE_STATS` instead of `FIND_DOCUMENT_INFO` or `STORAGE_QUERY`.
-- **1d. Live MediaStore Counts**: Count queries for photos/videos/audio query MediaStore directly.
-- **1e. Greetings Persona**: First greeting introduces Docsy by name and describes all capabilities in plain words.
-- **1f. Chat Layout Insets**: Verified padding and IME bounds.
+### 2. Device-Wide Unrestricted Storage Scanning
+- Updated [`DocumentRepository.kt`](file:///C:/Users/abhin/Downloads/docsy%20(3)/app/src/main/java/com/suhrud/docsy/data/repository/DocumentRepository.kt) to scan the core storage root (`Environment.getExternalStorageDirectory()`) recursively (`walkTopDown()`) across all device folders directly without artificial file caps.
 
-### Version & Flavor Info
-- Set `versionName = "1.0.5"` and `versionCode = 6` in `app/build.gradle.kts`.
-- Verified signed release flavors (`full`, `noSmsCalls`, `filesOnly`) using `apksigner`.
+### 3. Human-like Conversational Interactions (ChatGPT Persona)
+- Updated [`ResponseComposer.kt`](file:///C:/Users/abhin/Downloads/docsy%20(3)/app/src/main/java/com/suhrud/docsy/domain/ai/llm/ResponseComposer.kt) with natural ChatGPT-style conversational responses, personalized greetings, and articulate time-of-day awareness.
 
 ## Phase Checklist
 
-- [x] **Phase 1: Version 1.0.5 & Build**
-  - [x] `versionName = "1.0.5"`, `versionCode = 6`
-  - [x] Official release keystore `docsy-release-key.jks` and `keystore.properties`
-  - [x] `apksigner verify` verified v2 & v3 schemes and `CN=Docsy Release` certificate
-  - [x] Product flavors `full`, `noSmsCalls`, `filesOnly`
-- [x] **Phase 2: Audit & Extraction Inspector**
-  - [x] `AUDIT.md` updated with proof matrix
-  - [x] Debug-only `ExtractionInspectorScreen.kt` built
-- [x] **Phase 3: Part 1 Quick Bug Fixes**
-  - [x] Sequential message queue with `Mutex` in `DocsyViewModel.kt`
-  - [x] Live system data reads with timestamp
-  - [x] Fixed `nu-MB-er` word boundary bug in `getFileCountType`
-  - [x] First greeting capability description & greeting time-of-day awareness
-- [x] **Phase 4: Unit Testing & Verification**
-  - [x] `FileCountRoutingTest.kt` contrastive tests
-  - [x] `assembleDebug` passed
-  - [x] `testFullDebugUnitTest` passed (46/46 unit tests)
-  - [x] `assembleRelease` passed (all 3 flavors)
+- [x] **Phase 1: Boosted Full-Native Resolution OCR Extraction**
+  - [x] Removed 2048px dimension caps in `TextExtractor.kt`
+  - [x] High-density 3.0x scale PDF rendering
+  - [x] Increased PDF max page scan cap to 20 pages
+- [x] **Phase 2: Core Storage Root & Full Device Folder Scanning**
+  - [x] Uncapped MediaStore queries
+  - [x] Core storage root direct recursive file-system scanning in `DocumentRepository.kt`
+- [x] **Phase 3: Conversational ChatGPT Persona & Variety Engine**
+  - [x] Enhanced `ResponseComposer.kt` with articulate, warm, human-like voice
+- [x] **Phase 4: Build & Test Verification**
+  - [x] `:app:assembleFullDebug` passed
+  - [x] `:app:testFullDebugUnitTest` passed (46/46 unit tests)
+  - [x] `:app:assembleRelease` passed (all 3 release flavors)
