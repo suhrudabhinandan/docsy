@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Docsy</string>
+
+    <string name="avatar_desc_01">Woman with long dark hair in a white saree and pearl earring</string>
+    <string name="avatar_desc_02">Person with curly hair playing acoustic guitar</string>
+    <string name="avatar_desc_03">Person with headphones wearing a hoodie</string>
+    <string name="avatar_desc_04">Person with round glasses and hair bun reading a book</string>
+    <string name="avatar_desc_05">Person with hair bun holding a DSLR camera</string>
+    <string name="avatar_desc_06">Person in a cap and hoodie with backpack strap</string>
+    <string name="avatar_desc_07">Woman with long wavy hair and headphones, holding a steaming mug</string>
+    <string name="avatar_desc_08">Person resting chin on hand at a laptop with a stack of books</string>
+    <string name="avatar_desc_09">Person reading a book with a mug, plant, and books</string>
+    <string name="avatar_desc_10">Woman with round glasses, bun, laptop, mug, and plant</string>
+    <string name="avatar_desc_11">Bearded man with round glasses holding a steaming mug</string>
+    <string name="avatar_desc_12">Older woman with white hair bun, glasses, and floral saree holding a mug and open book</string>
+    <string name="avatar_desc_13">Student with glasses and bun studying with laptop and books</string>
+    <string name="avatar_desc_14">Gym person with towel and shaker bottle</string>
+    <string name="avatar_desc_15">Elderly man with white hair and beard, glasses, mug, and cardigan</string>
+    <string name="avatar_desc_16">Person singing with guitar, microphone, and music notes</string>
+    <string name="avatar_desc_17">Person in white hoodie writing in a notebook at a desk</string>
+</resources>

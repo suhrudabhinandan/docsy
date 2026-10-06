@@ -1,0 +1,6 @@
+{
+  "name": "Docsy",
+  "description": "Private, fully offline personal document AI. Ask your documents anything on device.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

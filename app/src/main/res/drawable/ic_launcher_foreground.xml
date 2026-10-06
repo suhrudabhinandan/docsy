@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Docsy Emblem: Folded document forming letter 'D' inside 66dp safe zone (21..87) -->
+    
+    <!-- Outer Document shape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,26 L62,26 L74,38 L74,80 C74,81.1 73.1,82 72,82 L34,82 C32.9,82 32,81.1 32,80 L32,28 C32,26.9 32.9,26 34,26 Z" />
+    
+    <!-- Folded top-right corner -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M62,26 L74,38 L62,38 Z" />
+    
+    <!-- Internal Cutout to form a stark modern 'D' counter space -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M44,40 L56,40 C63,40 66,45 66,54 C66,63 63,68 56,68 L44,68 Z M49,47 L49,61 L54,61 C57,61 60,59 60,54 C60,49 57,47 54,47 Z" />
+    
+    <!-- Accent technical dots inside D representing neural/indexed nodes -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,72h3v3h-3zM44,72h3v3h-3zM50,72h3v3h-3z" />
+</vector>

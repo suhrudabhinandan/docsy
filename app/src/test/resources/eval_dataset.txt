@@ -1,0 +1,237 @@
+# Intent: SMALL_TALK
+hi|SMALL_TALK
+hello|SMALL_TALK
+hey|SMALL_TALK
+good morning|SMALL_TALK
+good afternoon|SMALL_TALK
+good evening|SMALL_TALK
+good night|SMALL_TALK
+namaste|SMALL_TALK
+shubh prabhat|SMALL_TALK
+kaise ho|SMALL_TALK
+how are you|SMALL_TALK
+who are you|SMALL_TALK
+what can you do|SMALL_TALK
+help|SMALL_TALK
+thanks|SMALL_TALK
+thank you|SMALL_TALK
+dhanyawad|SMALL_TALK
+bye|SMALL_TALK
+goodbye|SMALL_TALK
+ok|SMALL_TALK
+cool|SMALL_TALK
+hmm|SMALL_TALK
+nice|SMALL_TALK
+great|SMALL_TALK
+sorry|SMALL_TALK
+hello docsy|SMALL_TALK
+hey docsy|SMALL_TALK
+good morning docsy|SMALL_TALK
+namaste ji|SMALL_TALK
+kaise ho aap|SMALL_TALK
+how are you doing|SMALL_TALK
+what can you do for me|SMALL_TALK
+thank you so much|SMALL_TALK
+dhanyawad ji|SMALL_TALK
+bye bye|SMALL_TALK
+ok cool|SMALL_TALK
+good|SMALL_TALK
+good!|SMALL_TALK
+hi there|SMALL_TALK
+hey man|SMALL_TALK
+
+# Intent: DATE_TIME
+time|DATE_TIME
+time?|DATE_TIME
+what time is it|DATE_TIME
+what's the time right now|DATE_TIME
+current time|DATE_TIME
+tell me the time|DATE_TIME
+time now|DATE_TIME
+what is the time|DATE_TIME
+clock|DATE_TIME
+tell time|DATE_TIME
+today's date|DATE_TIME
+todays date|DATE_TIME
+date today|DATE_TIME
+what is today's date|DATE_TIME
+current date|DATE_TIME
+what date is it today|DATE_TIME
+date now|DATE_TIME
+date|DATE_TIME
+what day is it|DATE_TIME
+what day is today|DATE_TIME
+day today|DATE_TIME
+which day is today|DATE_TIME
+what day|DATE_TIME
+tomorrow|DATE_TIME
+what day is tomorrow|DATE_TIME
+date tomorrow|DATE_TIME
+yesterday|DATE_TIME
+what day was yesterday|DATE_TIME
+date yesterday|DATE_TIME
+time in 5 hours|DATE_TIME
+what time 2 hours ago|DATE_TIME
+hours until midnight|DATE_TIME
+week number|DATE_TIME
+current month|DATE_TIME
+current year|DATE_TIME
+days left in month|DATE_TIME
+days left in year|DATE_TIME
+is today monday|DATE_TIME
+is today sunday|DATE_TIME
+is leap year|DATE_TIME
+
+# Intent: STEPS_QUERY
+how many steps today|STEPS_QUERY
+steps count|STEPS_QUERY
+walking distance|STEPS_QUERY
+how much did I walk|STEPS_QUERY
+my steps today|STEPS_QUERY
+step counter|STEPS_QUERY
+total steps|STEPS_QUERY
+did I walk today|STEPS_QUERY
+how many steps did I take|STEPS_QUERY
+walk count|STEPS_QUERY
+daily steps|STEPS_QUERY
+steps taken|STEPS_QUERY
+steps|STEPS_QUERY
+steps?|STEPS_QUERY
+mera step count|STEPS_QUERY
+aaj kitne steps hue|STEPS_QUERY
+total walk|STEPS_QUERY
+weekly steps|STEPS_QUERY
+average steps|STEPS_QUERY
+most active day|STEPS_QUERY
+
+# Intent: DEVICE_INFO
+battery?|DEVICE_INFO
+battery percentage|DEVICE_INFO
+kitni battery hai|DEVICE_INFO
+battery status|DEVICE_INFO
+charging state|DEVICE_INFO
+ram|DEVICE_INFO
+ram kitni hai|DEVICE_INFO
+available ram|DEVICE_INFO
+memory info|DEVICE_INFO
+internet speed?|DEVICE_INFO
+wifi connection?|DEVICE_INFO
+wifi connection info?|DEVICE_INFO
+display info|DEVICE_INFO
+screen resolution|DEVICE_INFO
+kernel|DEVICE_INFO
+android version|DEVICE_INFO
+phone specs|DEVICE_INFO
+tell me about my phone|DEVICE_INFO
+cpu architecture|DEVICE_INFO
+uptime|DEVICE_INFO
+system language|DEVICE_INFO
+time zone|DEVICE_INFO
+network status|DEVICE_INFO
+wifi link speed|DEVICE_INFO
+storage info|DEVICE_INFO
+camera details|DEVICE_INFO
+sensors list|DEVICE_INFO
+volume levels|DEVICE_INFO
+bluetooth status|DEVICE_INFO
+gps status|DEVICE_INFO
+
+# Intent: DEVICE_STATS
+photos?|DEVICE_STATS
+how many photos|DEVICE_STATS
+total pictures|DEVICE_STATS
+how many videos|DEVICE_STATS
+videos count|DEVICE_STATS
+how many songs|DEVICE_STATS
+audio count|DEVICE_STATS
+how many pdfs|DEVICE_STATS
+how many documents|DEVICE_STATS
+how many files|DEVICE_STATS
+biggest file|DEVICE_STATS
+largest photo|DEVICE_STATS
+newest video|DEVICE_STATS
+oldest document|DEVICE_STATS
+contacts count|DEVICE_STATS
+
+# Intent: SMS_QUERY
+how many sms|SMS_QUERY
+text messages count|SMS_QUERY
+inbox messages|SMS_QUERY
+total sms|SMS_QUERY
+recent messages|SMS_QUERY
+
+# Intent: CALL_QUERY
+call log|CALL_QUERY
+missed calls|CALL_QUERY
+recent calls|CALL_QUERY
+total calls|CALL_QUERY
+
+# Intent: APP_QUERY
+installed apps|APP_QUERY
+how many applications|APP_QUERY
+user apps|APP_QUERY
+system apps|APP_QUERY
+
+# Intent: OUT_OF_SCOPE
+who is the prime minister of india|OUT_OF_SCOPE
+capital of france|OUT_OF_SCOPE
+what is photosynthesis|OUT_OF_SCOPE
+weather in tokyo|OUT_OF_SCOPE
+recipe for pizza|OUT_OF_SCOPE
+distance to the moon|OUT_OF_SCOPE
+who wrote hamlet|OUT_OF_SCOPE
+latest news|OUT_OF_SCOPE
+stock market today|OUT_OF_SCOPE
+score of match|OUT_OF_SCOPE
+highest mountain in world|OUT_OF_SCOPE
+currency of japan|OUT_OF_SCOPE
+who won world cup|OUT_OF_SCOPE
+temperature in london|OUT_OF_SCOPE
+best movie of 2026|OUT_OF_SCOPE
+how to bake cake|OUT_OF_SCOPE
+population of earth|OUT_OF_SCOPE
+speed of light|OUT_OF_SCOPE
+meaning of life|OUT_OF_SCOPE
+who invented telephone|OUT_OF_SCOPE
+
+# Intent: FIND_DOCUMENT_INFO
+my 10th cbse marksheet|FIND_DOCUMENT_INFO
+my 12th marksheet|FIND_DOCUMENT_INFO
+electricity bill for april|FIND_DOCUMENT_INFO
+may water bill|FIND_DOCUMENT_INFO
+gas bill amount|FIND_DOCUMENT_INFO
+bank statement|FIND_DOCUMENT_INFO
+salary slip|FIND_DOCUMENT_INFO
+invoice receipt|FIND_DOCUMENT_INFO
+my resume|FIND_DOCUMENT_INFO
+exam timetable|FIND_DOCUMENT_INFO
+marriage certificate|FIND_DOCUMENT_INFO
+driving licence|FIND_DOCUMENT_INFO
+passport document|FIND_DOCUMENT_INFO
+vehicle rc card|FIND_DOCUMENT_INFO
+rent agreement|FIND_DOCUMENT_INFO
+insurance policy|FIND_DOCUMENT_INFO
+tax return file|FIND_DOCUMENT_INFO
+medical report|FIND_DOCUMENT_INFO
+degree certificate|FIND_DOCUMENT_INFO
+visa document|FIND_DOCUMENT_INFO
+
+# Intent: FIND_PERSONAL_INFO
+what is my aadhaar number|FIND_PERSONAL_INFO
+show my pan card|FIND_PERSONAL_INFO
+my aadhaar|FIND_PERSONAL_INFO
+pan number|FIND_PERSONAL_INFO
+
+# Intent: PERSONAL_PROFILE
+what is my name|PERSONAL_PROFILE
+what's my name|PERSONAL_PROFILE
+who am i|PERSONAL_PROFILE
+my name|PERSONAL_PROFILE
+tell me my name|PERSONAL_PROFILE
+
+# Intent: FOLDER_STATS
+files in downloads folder|FOLDER_STATS
+size of telegram folder|FOLDER_STATS
+how many photos in whatsapp folder|FOLDER_STATS
+folders in dcim|FOLDER_STATS
+largest file in camera folder|FOLDER_STATS
