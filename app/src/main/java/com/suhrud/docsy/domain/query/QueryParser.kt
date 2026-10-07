@@ -733,7 +733,9 @@ object QueryParser {
     private fun isMarksheetQuery(q: String): Boolean {
         return q.contains("marksheet") || q.contains("mark sheet") || q.contains("grade card") ||
                 q.contains("report card") || q.contains("score") || q.contains("percentage") ||
-                q.contains("cgpa") || q.contains("10th marks") || q.contains("12th marks")
+                q.contains("cgpa") || q.contains("10th marks") || q.contains("12th marks") ||
+                q.contains("10th mark") || q.contains("12th mark") || q.contains("mark list") ||
+                q.contains("marklist") || q.contains("marks") || q.contains("mark")
     }
 
     private fun extractAggregationOp(q: String): AggregationOp {

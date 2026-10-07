@@ -9,6 +9,7 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.suhrud.docsy.data.model.ChatMessageEntity
+import com.suhrud.docsy.data.model.ChatSessionEntity
 import com.suhrud.docsy.data.model.DocumentEntity
 import com.suhrud.docsy.data.model.DocumentFieldEntity
 import com.suhrud.docsy.data.model.DocumentFts
@@ -17,17 +18,29 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ChatDao {
-    @Query("SELECT * FROM chat_messages ORDER BY timestamp ASC")
-    fun getAllChatMessages(): Flow<List<ChatMessageEntity>>
+    @Query("SELECT * FROM chat_sessions ORDER BY lastUpdatedAt DESC")
+    fun getAllSessions(): Flow<List<ChatSessionEntity>>
 
-    @Query("SELECT * FROM chat_messages ORDER BY timestamp ASC")
-    suspend fun getAllChatMessagesDirect(): List<ChatMessageEntity>
+    @Query("SELECT * FROM chat_messages WHERE sessionId = :sessionId ORDER BY timestamp ASC")
+    fun getMessagesForSession(sessionId: String): Flow<List<ChatMessageEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSession(session: ChatSessionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMessage(message: ChatMessageEntity)
 
+    @Query("DELETE FROM chat_sessions WHERE sessionId = :sessionId")
+    suspend fun deleteSession(sessionId: String)
+
+    @Query("DELETE FROM chat_messages WHERE sessionId = :sessionId")
+    suspend fun deleteMessagesForSession(sessionId: String)
+
+    @Query("DELETE FROM chat_sessions")
+    suspend fun clearAllSessions()
+
     @Query("DELETE FROM chat_messages")
-    suspend fun clearChatHistory()
+    suspend fun clearAllMessages()
 }
 
 @Dao
@@ -202,9 +215,10 @@ interface StepDao {
         DocumentFts::class,
         DocumentFieldEntity::class,
         StepLogEntity::class,
-        ChatMessageEntity::class
+        ChatMessageEntity::class,
+        ChatSessionEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class DocsyDatabase : RoomDatabase() {

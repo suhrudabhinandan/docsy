@@ -135,12 +135,25 @@ data class StepLogEntity(
 )
 
 @Entity(
+    tableName = "chat_sessions",
+    indices = [Index("lastUpdatedAt")]
+)
+data class ChatSessionEntity(
+    @PrimaryKey
+    val sessionId: String = UUID.randomUUID().toString(),
+    val title: String,
+    val createdAt: Long = System.currentTimeMillis(),
+    val lastUpdatedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
     tableName = "chat_messages",
-    indices = [Index("timestamp")]
+    indices = [Index("timestamp"), Index("sessionId")]
 )
 data class ChatMessageEntity(
     @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
+    val sessionId: String = "default_session",
     val isUser: Boolean,
     val text: String,
     val timestamp: Long = System.currentTimeMillis(),

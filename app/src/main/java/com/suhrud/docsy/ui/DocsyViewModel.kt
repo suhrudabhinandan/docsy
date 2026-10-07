@@ -12,6 +12,7 @@ import androidx.work.WorkManager
 import com.suhrud.docsy.data.local.DocsyDatabase
 import com.suhrud.docsy.data.model.ChatMessage
 import com.suhrud.docsy.data.model.ChatMessageEntity
+import com.suhrud.docsy.data.model.ChatSessionEntity
 import com.suhrud.docsy.data.model.DocumentEntity
 import com.suhrud.docsy.data.repository.DocumentRepository
 import com.suhrud.docsy.domain.indexing.FileIndexingWorker
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Calendar
+import java.util.UUID
 
 class DocsyViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -83,42 +85,64 @@ class DocsyViewModel(application: Application) : AndroidViewModel(application) {
     val isIndexing = repository.isIndexing
     val indexingProgress = repository.indexingProgress
 
+    private val _chatSessions = MutableStateFlow<List<ChatSessionEntity>>(emptyList())
+    val chatSessions: StateFlow<List<ChatSessionEntity>> = _chatSessions.asStateFlow()
+
+    private val _currentSessionId = MutableStateFlow(
+        prefs.getString("current_session_id", null) ?: UUID.randomUUID().toString()
+    )
+    val currentSessionId: StateFlow<String> = _currentSessionId.asStateFlow()
+
+    private val _isHistoryOpen = MutableStateFlow(false)
+    val isHistoryOpen: StateFlow<Boolean> = _isHistoryOpen.asStateFlow()
+
     private val _chatHistory = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatHistory: StateFlow<List<ChatMessage>> = _chatHistory.asStateFlow()
 
     init {
         repository.registerMediaStoreObserver(application)
 
-        // Restore chat history from Room
+        // Observe chat sessions
         viewModelScope.launch {
             try {
                 val db = DocsyDatabase.getInstance(application)
-                val chatDao = db.chatDao()
-                chatDao.getAllChatMessages().collect { entities ->
-                    val messages = entities.map { entity ->
-                        ChatMessage(
-                            id = entity.id,
-                            isUser = entity.isUser,
-                            text = entity.text,
-                            timestamp = entity.timestamp,
-                            answerHighlight = entity.answerHighlight,
-                            supportingMetadata = entity.supportingMetadata,
-                            subtext = entity.subtext,
-                            sourceDocument = if (entity.sourceDocumentPath != null) {
-                                DocumentEntity(
-                                    pathUri = entity.sourceDocumentPath,
-                                    fileName = entity.sourceDocumentName ?: "Source File",
-                                    mimeType = entity.sourceDocumentMime ?: "application/octet-stream"
-                                )
-                            } else null,
-                            isSensitive = entity.isSensitive,
-                            unmaskedValue = entity.unmaskedValue,
-                            isRevealed = entity.isRevealed
-                        )
-                    }
-                    _chatHistory.value = messages
+                db.chatDao().getAllSessions().collect { sessions ->
+                    _chatSessions.value = sessions
                 }
             } catch (_: Exception) {}
+        }
+
+        // Observe messages for active session
+        viewModelScope.launch {
+            _currentSessionId.collect { activeId ->
+                try {
+                    val db = DocsyDatabase.getInstance(application)
+                    db.chatDao().getMessagesForSession(activeId).collect { entities ->
+                        val messages = entities.map { entity ->
+                            ChatMessage(
+                                id = entity.id,
+                                isUser = entity.isUser,
+                                text = entity.text,
+                                timestamp = entity.timestamp,
+                                answerHighlight = entity.answerHighlight,
+                                supportingMetadata = entity.supportingMetadata,
+                                subtext = entity.subtext,
+                                sourceDocument = if (entity.sourceDocumentPath != null) {
+                                    DocumentEntity(
+                                        pathUri = entity.sourceDocumentPath,
+                                        fileName = entity.sourceDocumentName ?: "Source File",
+                                        mimeType = entity.sourceDocumentMime ?: "application/octet-stream"
+                                    )
+                                } else null,
+                                isSensitive = entity.isSensitive,
+                                unmaskedValue = entity.unmaskedValue,
+                                isRevealed = entity.isRevealed
+                            )
+                        }
+                        _chatHistory.value = messages
+                    }
+                } catch (_: Exception) {}
+            }
         }
 
         try {
@@ -221,14 +245,40 @@ class DocsyViewModel(application: Application) : AndroidViewModel(application) {
         _searchQuery.value = query
     }
 
+    fun openHistory() {
+        _isHistoryOpen.value = true
+    }
+
+    fun closeHistory() {
+        _isHistoryOpen.value = false
+    }
+
     fun startNewChat() {
+        val newSessionId = UUID.randomUUID().toString()
+        _currentSessionId.value = newSessionId
+        prefs.edit().putString("current_session_id", newSessionId).apply()
+        _chatHistory.value = emptyList()
+        clearActiveAnswer()
+    }
+
+    fun selectChatSession(sessionId: String) {
+        _currentSessionId.value = sessionId
+        prefs.edit().putString("current_session_id", sessionId).apply()
+        _isHistoryOpen.value = false
+        clearActiveAnswer()
+    }
+
+    fun deleteChatSession(sessionId: String) {
         viewModelScope.launch {
             try {
                 val db = DocsyDatabase.getInstance(getApplication())
-                db.chatDao().clearChatHistory()
+                db.chatDao().deleteSession(sessionId)
+                db.chatDao().deleteMessagesForSession(sessionId)
             } catch (_: Exception) {}
-            _chatHistory.value = emptyList()
-            clearActiveAnswer()
+
+            if (sessionId == _currentSessionId.value) {
+                startNewChat()
+            }
         }
     }
 
@@ -241,6 +291,8 @@ class DocsyViewModel(application: Application) : AndroidViewModel(application) {
         _searchQuery.value = ""
         _activeQuery.value = trimmed
 
+        val activeSessionId = _currentSessionId.value
+
         val userMessage = ChatMessage(isUser = true, text = trimmed)
         val currentList = _chatHistory.value.toMutableList()
         currentList.add(userMessage)
@@ -251,9 +303,21 @@ class DocsyViewModel(application: Application) : AndroidViewModel(application) {
                 _isSearching.value = true
                 try {
                     val db = DocsyDatabase.getInstance(getApplication())
-                    db.chatDao().insertMessage(
+                    val chatDao = db.chatDao()
+
+                    val sessionTitle = trimmed.take(32)
+                    chatDao.insertSession(
+                        ChatSessionEntity(
+                            sessionId = activeSessionId,
+                            title = sessionTitle,
+                            lastUpdatedAt = System.currentTimeMillis()
+                        )
+                    )
+
+                    chatDao.insertMessage(
                         ChatMessageEntity(
                             id = userMessage.id,
+                            sessionId = activeSessionId,
                             isUser = true,
                             text = userMessage.text,
                             timestamp = userMessage.timestamp
@@ -271,9 +335,10 @@ class DocsyViewModel(application: Application) : AndroidViewModel(application) {
                     updatedList.add(docsyMessage)
                     _chatHistory.value = updatedList
 
-                    db.chatDao().insertMessage(
+                    chatDao.insertMessage(
                         ChatMessageEntity(
                             id = docsyMessage.id,
+                            sessionId = activeSessionId,
                             isUser = false,
                             text = docsyMessage.text,
                             timestamp = docsyMessage.timestamp,
@@ -286,6 +351,14 @@ class DocsyViewModel(application: Application) : AndroidViewModel(application) {
                             isSensitive = docsyMessage.isSensitive,
                             unmaskedValue = docsyMessage.unmaskedValue,
                             isRevealed = docsyMessage.isRevealed
+                        )
+                    )
+
+                    chatDao.insertSession(
+                        ChatSessionEntity(
+                            sessionId = activeSessionId,
+                            title = sessionTitle,
+                            lastUpdatedAt = System.currentTimeMillis()
                         )
                     )
                 } catch (e: Exception) {

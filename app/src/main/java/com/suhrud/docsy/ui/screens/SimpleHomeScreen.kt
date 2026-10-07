@@ -113,6 +113,12 @@ fun SimpleHomeScreen(
         viewModel.submitQuery()
     }
 
+    val isHistoryOpen by viewModel.isHistoryOpen.collectAsState()
+
+    if (isHistoryOpen) {
+        ChatHistorySheet(viewModel = viewModel)
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -125,13 +131,16 @@ fun SimpleHomeScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // TOP BAR: "New chat" action if thread is active, and Profile Avatar on right
+            // TOP BAR: "+ New chat" & "History" buttons on left, Profile Avatar on right
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (chatHistory.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(18.dp))
@@ -148,8 +157,23 @@ fun SimpleHomeScreen(
                             color = TextPrimary
                         )
                     }
-                } else {
-                    Spacer(modifier = Modifier.size(40.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(18.dp))
+                            .border(1.dp, BorderLight, RoundedCornerShape(18.dp))
+                            .background(PureWhite)
+                            .springClickable { viewModel.openHistory() }
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                            .testTag("btn_history"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "History",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = TextPrimary
+                        )
+                    }
                 }
 
                 Box(
