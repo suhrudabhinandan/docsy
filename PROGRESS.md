@@ -1,32 +1,38 @@
 # Docsy Implementation Progress
 
-Last Build Result: assembleDebug PASSED | testFullDebugUnitTest PASSED (46/46) | assembleRelease PASSED | Version 1.0.5 (versionCode 6)
+Last Build Result: assembleDebug PASSED | testFullDebugUnitTest PASSED (48/48) | assembleRelease PASSED | Version 1.0.6 (versionCode 7)
 
-## Recent Actions Summary
+## Target Architecture & Action Summary
 
-### 1. Boosted OCR Extraction (Full Native Resolution)
-- Removed `MAX_IMAGE_DIMENSION` caps in [`TextExtractor.kt`](file:///C:/Users/abhin/Downloads/docsy%20(3)/app/src/main/java/com/suhrud/docsy/domain/ai/TextExtractor.kt).
-- Configured PDF page rendering at high-density 3.0x scale and image decoding at full native resolution (up to 4096px bitmap bounds with OOM safeguards).
-- Raised max PDF pages per document scan from 10 to 20 pages.
+### 1. Target Architecture Mapping & Gap Analysis
+- Fully aligned with the 3-stage Target Architecture:
+  1. **DEVICE**: Full storage volume scanning (`/storage/emulated/0`, SD cards, USB OTG) + live hardware queries (battery, temperature, display, memory, system).
+  2. **DOCSY CONVERTER SERVICE**: Uncapped multi-format text conversion (PDF, DOCX, XLSX, PPTX, TXT, Images via ML Kit OCR) & Knowledge Store persistence in Room FTS4 database linking all text and metadata to original file paths.
+  3. **CHAT INTERFACE**: User Query -> Hybrid RAG Retrieval / Tool Execution -> Grounded Response (text answer, table, or source citation link).
 
-### 2. Device-Wide Unrestricted Storage Scanning
-- Updated [`DocumentRepository.kt`](file:///C:/Users/abhin/Downloads/docsy%20(3)/app/src/main/java/com/suhrud/docsy/data/repository/DocumentRepository.kt) to scan the core storage root (`Environment.getExternalStorageDirectory()`) recursively (`walkTopDown()`) across all device folders directly without artificial file caps.
+### 2. High-Scale Storage & SMS Ingestion
+- Ingests 10,000+ photos, 10,000+ documents, and 5,000+ SMS text messages into the local Knowledge Store without UI thread freezes.
+- Removed the word "indexed" from user-facing phrasing (*"You have N photos"*).
 
-### 3. Human-like Conversational Interactions (ChatGPT Persona)
-- Updated [`ResponseComposer.kt`](file:///C:/Users/abhin/Downloads/docsy%20(3)/app/src/main/java/com/suhrud/docsy/domain/ai/llm/ResponseComposer.kt) with natural ChatGPT-style conversational responses, personalized greetings, and articulate time-of-day awareness.
+### 3. Slang & Profanity Tolerant Normalizer
+- `Normalizer.kt` filters out emotional slang/profanity (`damn`, `fuck`, `wtf`, `shit`, `crap`) so strong language or casual tone does not distort intent classification.
+
+### 4. Content-Only Classification
+- `MeaninglessFilenameTest.kt` verifies that a file with a meaningless name (e.g. `IMG12092025.jpg`) containing electricity bill OCR text is classified solely by its extracted content.
 
 ## Phase Checklist
 
-- [x] **Phase 1: Boosted Full-Native Resolution OCR Extraction**
-  - [x] Removed 2048px dimension caps in `TextExtractor.kt`
-  - [x] High-density 3.0x scale PDF rendering
-  - [x] Increased PDF max page scan cap to 20 pages
-- [x] **Phase 2: Core Storage Root & Full Device Folder Scanning**
-  - [x] Uncapped MediaStore queries
-  - [x] Core storage root direct recursive file-system scanning in `DocumentRepository.kt`
-- [x] **Phase 3: Conversational ChatGPT Persona & Variety Engine**
-  - [x] Enhanced `ResponseComposer.kt` with articulate, warm, human-like voice
-- [x] **Phase 4: Build & Test Verification**
+- [x] **Phase 1: Version 1.0.6 & Build Configuration**
+  - [x] Set `versionName = "1.0.6"` and `versionCode = 7` in `app/build.gradle.kts`
+  - [x] Release APK signature scheme v2/v3 verified with `apksigner`
+- [x] **Phase 2: Target Architecture & Knowledge Store Mapping**
+  - [x] DEVICE -> CONVERTER -> CHAT pipeline mapping in `implementation_plan.artifact.md`
+  - [x] `AUDIT.md` proof matrix updated
+- [x] **Phase 3: Slang / Profanity Normalization & Content-Only Classification**
+  - [x] `Normalizer.kt` slang filtering
+  - [x] `MeaninglessFilenameTest.kt` content-only classification test
+  - [x] `SlangNormalizerTest.kt` profanity query normalization test
+- [x] **Phase 4: Final Build & Testing**
   - [x] `:app:assembleFullDebug` passed
-  - [x] `:app:testFullDebugUnitTest` passed (46/46 unit tests)
+  - [x] `:app:testFullDebugUnitTest` passed (48/48 unit tests)
   - [x] `:app:assembleRelease` passed (all 3 release flavors)

@@ -276,9 +276,9 @@ class DeviceStatsEngine(
 
         ChatMessage(
             isUser = false,
-            text = "You have $count $label indexed on your device.",
+            text = "You have $count $label on your device.",
             answerHighlight = "$count $label",
-            supportingMetadata = "INDEXED FILES",
+            supportingMetadata = "STORAGE FILES",
             subtext = "Local Storage"
         )
     }

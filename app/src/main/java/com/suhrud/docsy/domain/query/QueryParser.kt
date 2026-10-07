@@ -151,6 +151,16 @@ object QueryParser {
             return dateTimeParsed
         }
 
+        val routerTrace = EnsembleRouter.routeQuery(rawQuery)
+        if (routerTrace.finalDecision.type == RoutingType.ANSWERABLE && routerTrace.finalDecision.intent != QueryIntent.UNKNOWN && routerTrace.finalDecision.intent != QueryIntent.FIND_DOCUMENT_INFO) {
+            return ParsedQuery(
+                intent = routerTrace.finalDecision.intent,
+                filterType = routerTrace.finalDecision.subtopic,
+                dateFilter = extractDateFilter(q),
+                rawQuery = rawQuery
+            )
+        }
+
         val semanticMatch = SemanticIntentClassifier.classifySemanticIntent(rawQuery)
         if (semanticMatch != null && semanticMatch.intent != QueryIntent.UNKNOWN) {
             return semanticMatch.copy(dateFilter = extractDateFilter(q))

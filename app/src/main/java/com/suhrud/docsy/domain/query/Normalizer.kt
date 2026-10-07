@@ -41,6 +41,11 @@ object Normalizer {
         "kaise" to "how"
     )
 
+    private val SLANG_PROFANITY_TOKENS = setOf(
+        "damn", "dammit", "fuck", "fucking", "fucked", "fuk", "shit", "wtf", "crap",
+        "hell", "dead", "crazy", "insane", "bloody", "bastard", "bitch", "ass", "bro", "dude", "man", "mate"
+    )
+
     private val INTERNAL_VOCABULARY = setOf(
         "battery", "wifi", "network", "display", "screen", "ram", "storage",
         "photos", "videos", "audio", "steps", "documents", "sms", "calls",
@@ -60,13 +65,17 @@ object Normalizer {
             q = q.replace(Regex("""\b$variant\b"""), target)
         }
 
-        val tokens = q.split(" ").map { token ->
+        val rawTokens = q.split(" ")
+        val filteredTokens = rawTokens.filter { token ->
+            token.lowercase(Locale.ROOT) !in SLANG_PROFANITY_TOKENS || rawTokens.size <= 2
+        }
+
+        val tokens = filteredTokens.map { token ->
             val hMapped = HINGLISH_MAP[token]
             if (hMapped != null) return@map hMapped
 
             if (token in INTERNAL_VOCABULARY) return@map token
 
-            // Edit distance correction against internal vocabulary only
             val corrected = INTERNAL_VOCABULARY.find { vocabWord ->
                 levenshteinDistance(token, vocabWord) == 1 && token.length > 3
             }

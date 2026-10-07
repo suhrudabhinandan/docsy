@@ -11,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.suhrud.docsy.data.local.DocumentDao
 import com.suhrud.docsy.data.model.DocumentCategories
 import com.suhrud.docsy.data.model.DocumentEntity
@@ -25,7 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.File
+import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
@@ -54,6 +55,7 @@ class DocumentRepository(
             scanMediaStoreImages(context)
             scanMediaStoreAudio(context)
             scanMediaStoreVideo(context)
+            scanSmsMessages(context)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
                 scanDirectDirectories(context)
@@ -69,6 +71,66 @@ class DocumentRepository(
         } finally {
             _isIndexing.value = false
             _indexingProgress.value = ""
+        }
+    }
+
+    private suspend fun scanSmsMessages(context: Context) = withContext(Dispatchers.IO) {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.READ_SMS
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        if (!hasPermission) return@withContext
+
+        val projection = arrayOf("_id", "address", "body", "date")
+        val uris = listOf(
+            Uri.parse("content://sms/inbox"),
+            Uri.parse("content://sms/sent")
+        )
+
+        for (smsUri in uris) {
+            try {
+                context.contentResolver.query(smsUri, projection, null, null, "date DESC")?.use { cursor ->
+                    val idCol = cursor.getColumnIndexOrThrow("_id")
+                    val addrCol = cursor.getColumnIndexOrThrow("address")
+                    val bodyCol = cursor.getColumnIndexOrThrow("body")
+                    val dateCol = cursor.getColumnIndexOrThrow("date")
+
+                    while (cursor.moveToNext()) {
+                        val id = cursor.getLong(idCol)
+                        val address = cursor.getString(addrCol) ?: "Unknown"
+                        val body = cursor.getString(bodyCol) ?: ""
+                        val date = cursor.getLong(dateCol)
+
+                        if (body.isNotBlank()) {
+                            val pathUri = "sms://$id"
+                            val fileName = "SMS from $address"
+                            val fullText = "SMS Message. From/To: $address. Date: ${Date(date)}. Content: $body"
+
+                            documentDao.insertDocument(
+                                DocumentEntity(
+                                    id = UUID.nameUUIDFromBytes(pathUri.toByteArray()).toString(),
+                                    pathUri = pathUri,
+                                    fileName = fileName,
+                                    extension = "sms",
+                                    mimeType = "text/x-sms",
+                                    fileSizeBytes = body.length.toLong(),
+                                    createdDate = date,
+                                    modifiedDate = date,
+                                    isDirectory = false,
+                                    parentFolder = "SMS",
+                                    extractedText = fullText,
+                                    documentType = "SMS",
+                                    indexStatus = "INDEXED",
+                                    summary = body.take(120)
+                                )
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Error querying SMS content resolver: ${e.message}")
+            }
         }
     }
 
