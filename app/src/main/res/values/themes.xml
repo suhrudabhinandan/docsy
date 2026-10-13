@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MyApplication" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_empty_icon</item>
+        <item name="windowSplashScreenBackground">#0F0F11</item>
+        <item name="postSplashScreenTheme">@style/Theme.Docsy.App</item>
+    </style>
+
+    <style name="Theme.Docsy.App" parent="android:Theme.DeviceDefault.NoActionBar" />
+</resources>

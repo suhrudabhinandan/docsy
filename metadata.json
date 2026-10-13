@@ -1,0 +1,6 @@
+{
+  "name": "Docsy",
+  "description": "On-device personal knowledge store, document reader, and assistant",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
