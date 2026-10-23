@@ -1,0 +1,113 @@
+id,split,intent,query
+1,train,greetings,hello
+2,train,greetings,hi
+3,train,greetings,hey there
+4,train,greetings,good morning
+5,train,greetings,good afternoon
+6,train,greetings,namaste
+7,train,greetings,yo
+8,train,greetings,sup
+9,dev,greetings,hey docsy
+10,dev,greetings,hi there
+11,test,greetings,hello docsy
+12,test,greetings,good evening docsy
+13,train,how_are_you,how are you
+14,train,how_are_you,how are you doing
+15,train,how_are_you,how's life
+16,train,how_are_you,kaise ho
+17,train,how_are_you,how is it going
+18,dev,how_are_you,how are you today
+19,dev,how_are_you,how's it going
+20,test,how_are_you,how are you doing docsy
+21,test,how_are_you,kaise ho aap
+22,train,who_are_you,who are you
+23,train,who_are_you,what is your name
+24,train,who_are_you,what are you
+25,train,who_are_you,who made you
+26,train,who_are_you,tum kaun ho
+27,dev,who_are_you,tell me who you are
+28,dev,who_are_you,what's your name
+29,test,who_are_you,identify yourself
+30,test,who_are_you,who built you
+31,train,age,how old are you
+32,train,age,what is your age
+33,train,age,what age are you
+34,train,age,when were you created
+35,train,age,how many years old are you
+36,dev,age,what's your age
+37,dev,age,tell me your age
+38,test,age,how old are you docsy
+39,test,age,how many years have you been around
+40,train,joke,tell me a joke
+41,train,joke,make me laugh
+42,train,joke,say something funny
+43,train,joke,do you know any jokes
+44,train,joke,crack a joke
+45,dev,joke,tell me something funny
+46,dev,joke,tell a joke
+47,test,joke,can you tell me a joke
+48,test,joke,funny joke please
+49,train,coin_flip,flip a coin
+50,train,coin_flip,toss a coin
+51,train,coin_flip,heads or tails
+52,train,coin_flip,coin toss
+53,train,coin_flip,flip coin
+54,dev,coin_flip,toss coin for me
+55,dev,coin_flip,can you flip a coin
+56,test,coin_flip,flip a coin docsy
+57,test,coin_flip,do a coin toss
+58,train,dice_roll,roll a dice
+59,train,dice_roll,roll die
+60,train,dice_roll,throw a dice
+61,train,dice_roll,roll a 6 sided die
+62,train,dice_roll,dice roll
+63,dev,dice_roll,roll dice for me
+64,dev,dice_roll,can you roll a die
+65,test,dice_roll,roll a die docsy
+66,test,dice_roll,throw the dice
+67,train,gratitude,thank you
+68,train,gratitude,thanks
+69,train,gratitude,shukriya
+70,train,gratitude,thank you so much
+71,train,gratitude,thanks a lot
+72,dev,gratitude,thank you docsy
+73,dev,gratitude,much appreciated
+74,test,gratitude,thanks docsy
+75,test,gratitude,thx
+76,train,farewell,bye
+77,train,farewell,goodbye
+78,train,farewell,see you later
+79,train,farewell,alvida
+80,train,farewell,talk to you later
+81,dev,farewell,bye docsy
+82,dev,farewell,see ya
+83,test,farewell,goodbye docsy
+84,test,farewell,bye bye
+85,train,version,what version are you
+86,train,version,app version
+87,train,version,which version of docsy
+88,train,version,show version
+89,train,version,version number
+90,dev,version,what is your version
+91,dev,version,check app version
+92,test,version,what version is docsy
+93,test,version,version details
+94,train,emergency,call 911
+95,train,emergency,call emergency
+96,train,emergency,I need emergency help
+97,train,emergency,help emergency
+98,train,emergency,contact police
+99,train,emergency,call ambulance
+100,dev,emergency,i have an emergency
+101,dev,emergency,call police
+102,test,emergency,this is an emergency
+103,test,emergency,help emergency now
+104,train,self_harm,i want to hurt myself
+105,train,self_harm,i feel like ending my life
+106,train,self_harm,suicide hotline
+107,train,self_harm,self harm help
+108,train,self_harm,i want to die
+109,dev,self_harm,i want to kill myself
+110,dev,self_harm,help with self harm
+111,test,self_harm,feeling suicidal help
+112,test,self_harm,thoughts of self harm

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Docsy</string>
+    <string name="allow_access">Allow Access</string>
+    <string name="continue_label">Continue</string>
+</resources>
